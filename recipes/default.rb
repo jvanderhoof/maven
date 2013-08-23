@@ -24,8 +24,14 @@ include_recipe "java"
 include_recipe "ark"
 
 mvn_version = node['maven']['version'].to_s
+mvn_path = ::File.join(node[:maven][:m2_home],'bin','mvn')
 
 ark "maven" do
+  not_if {
+    ::File.exists?(mvn_path) &&
+    "#{mvn_path} -version | grep '#{node['maven'][mvn_version]['version']}'"
+  }
+  not_if "usr/local/bin/fusermount --version | grep '#{node[:s3fs][:fuse_version]}'"
   url node['maven'][mvn_version]['url']
   checksum node['maven'][mvn_version]['checksum']
   home_dir node['maven']['m2_home']
